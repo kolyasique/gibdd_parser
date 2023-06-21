@@ -13,15 +13,24 @@ function fileHandler(vin, status) {
     console.log('Записано в файл!');
   });
 }
-
+async function twoSelectors(str) {
+  try {
+    console.log('-- Без фото');
+    await str.waitForSelector('body > div.b-wrapper > div.b-content.b-media-cont.b-media-cont_margin_huge > div.b-left-side > div > div > div.b-media-cont.b-media-cont_margin_b-size-m > div:nth-child(1) > div.e1bmw9hg0.css-16u02xk.e93r9u20');
+  } catch (error) {
+    // Поиск с фото
+    await str.waitForSelector('body > div.b-wrapper > div.b-content.b-media-cont.b-media-cont_margin_huge > div.b-left-side > div > div > div.b-media-cont.b-media-cont_margin_b-size-m > div:nth-child(1) > div > div.css-1ff36h2.e41u9em0');
+  }
+}
 async function check(vint) {
   // console.log(typeof (vin), 'Внутри функции');
   const openBrowser = await puppeteer.launch();
   const page = await openBrowser.newPage();
-  page.setDefaultNavigationTimeout(10000);
+  page.setDefaultTimeout(10000);
   try {
     console.log(`1. Начало ${vint}`);
     await page.goto('https://vin.drom.ru/');
+    // await page.screenshot({ path: `./screenshots/test${vint}.png` });
     console.log('2. Ожидание инпута');
     await page.waitForSelector('#App > div > div.ekyhurd0.custom-1dyuwgp.e1ousbph0 > div.custom-1fz99xi.e11nz0r20 > div:nth-child(1) > div:nth-child(2) > div > form > div > input');
     console.log('3. Клик на инпут');
@@ -35,14 +44,18 @@ async function check(vint) {
     await page.waitForSelector('#App > div > div.ekyhurd0.custom-1dyuwgp.e1ousbph0 > div.custom-1fz99xi.e11nz0r20 > div:nth-child(1) > div:nth-child(2) > div > form > button');
     console.log('6. Пошел запрос!');
     await page.click('#App > div > div.ekyhurd0.custom-1dyuwgp.e1ousbph0 > div.custom-1fz99xi.e11nz0r20 > div:nth-child(1) > div:nth-child(2) > div > form > button');
+    await twoSelectors(page);
+    // await page.waitForSelector('body > div.b-wrapper > div.b-content.b-media-cont.b-media-cont_margin_huge > div.b-left-side > div > div > div.b-media-cont.b-media-cont_margin_b-size-m > div:nth-child(1) > div.e1bmw9hg0.css-16u02xk.e93r9u20');
 
-    await page.waitForSelector('body > div.b-wrapper > div.b-content.b-media-cont.b-media-cont_margin_huge > div.b-left-side > div > div > div.b-media-cont.b-media-cont_margin_b-size-m > div:nth-child(1) > div.e1bmw9hg0.css-16u02xk.e93r9u20');
+    // await page.waitForSelector('body > div.b-wrapper > div.b-content.b-media-cont.b-media-cont_margin_huge > div.b-left-side > div > div > div.b-media-cont.b-media-cont_margin_b-size-m > div:nth-child(1)');
+    await page.waitForTimeout(2000);
     await page.screenshot({ path: `./screenshots/${vint}.png` });
     await openBrowser.close();
     fileHandler(vint, 'информация найдена');
   } catch (error) {
     fileHandler(vint, 'н.д');
-    console.log(`7. По вин номеру ${vint} нет информации в базе`);
+    await openBrowser.close();
+    console.log(`7. По вин номеру ${vint} нет информации в базе, ${error}`);
   }
 }
 
